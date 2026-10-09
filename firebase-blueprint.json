@@ -1,0 +1,135 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User account profile and theme preferences",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Unique Firebase Auth UID"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User email address"
+        },
+        "displayName": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "User display name"
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "User avatar URL"
+        },
+        "themePreference": {
+          "type": "string",
+          "enum": ["light", "dark"],
+          "description": "User theme choice"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of creation"
+        }
+      },
+      "required": ["userId", "email"]
+    },
+    "SavedLeasingOffer": {
+      "title": "SavedLeasingOffer",
+      "description": "Individual vehicle leasing calculation saved by a user",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Offer document ID"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner user UID"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Custom label or vehicle name"
+        },
+        "fahrzeugName": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Vehicle model name"
+        },
+        "bruttolistenpreis": {
+          "type": "number",
+          "description": "Gross catalog price in EUR"
+        },
+        "monatlicheRate": {
+          "type": "number",
+          "description": "Monthly gross installment in EUR"
+        },
+        "laufzeit": {
+          "type": "number",
+          "description": "Contract duration in months"
+        },
+        "anzahlung": {
+          "type": "number",
+          "description": "One-time gross down payment in EUR"
+        },
+        "ueberfuehrungskosten": {
+          "type": "number",
+          "description": "Delivery/registration costs in EUR"
+        },
+        "mwstSatz": {
+          "type": "number",
+          "description": "VAT rate in percent"
+        },
+        "includeUeberfuehrungInFactor": {
+          "type": "boolean",
+          "description": "Whether transfer costs are factored in"
+        },
+        "fahrleistungKm": {
+          "type": "number",
+          "description": "Annual mileage in km"
+        },
+        "effektiveRateBrutto": {
+          "type": "number",
+          "description": "Effective gross monthly rate"
+        },
+        "bruttoLeasingfaktor": {
+          "type": "number",
+          "description": "Calculated gross leasing factor"
+        },
+        "nettoLeasingfaktor": {
+          "type": "number",
+          "description": "Calculated net leasing factor"
+        },
+        "gesamtkostenBrutto": {
+          "type": "number",
+          "description": "Total gross costs over runtime"
+        },
+        "ratingLabel": {
+          "type": "string",
+          "description": "Rating tier label (e.g. Sehr gut)"
+        },
+        "savedAt": {
+          "type": "string",
+          "description": "Human readable time or ISO timestamp"
+        }
+      },
+      "required": ["userId", "bruttolistenpreis", "monatlicheRate", "laufzeit"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "UserProfile"
+      },
+      "description": "User profile documents keyed by Auth UID"
+    },
+    "/users/{userId}/offers/{offerId}": {
+      "schema": {
+        "$ref": "SavedLeasingOffer"
+      },
+      "description": "Subcollection of saved leasing comparisons belonging to a user"
+    }
+  }
+}

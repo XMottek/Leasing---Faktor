@@ -1,0 +1,71 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny all unmapped paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Hardened Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // User profile collection
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow delete: if isOwner(userId) && isValidId(userId);
+
+      allow create: if isOwner(userId) && isValidId(userId)
+        && incoming().userId == request.auth.uid
+        && incoming().email is string
+        && incoming().email.size() <= 200;
+
+      allow update: if isOwner(userId) && isValidId(userId)
+        && incoming().userId == existing().userId
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'themePreference', 'email']);
+
+      // Subcollection: User saved offers
+      match /offers/{offerId} {
+        allow get, list: if isOwner(userId) && isValidId(userId);
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(offerId);
+
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(offerId)
+          && incoming().userId == request.auth.uid
+          && incoming().bruttolistenpreis is number
+          && incoming().bruttolistenpreis > 0
+          && incoming().monatlicheRate is number
+          && incoming().laufzeit is number
+          && incoming().laufzeit > 0;
+
+        allow update: if isOwner(userId) && isValidId(userId) && isValidId(offerId)
+          && incoming().userId == existing().userId
+          && incoming().diff(existing()).affectedKeys().hasOnly([
+            'name', 'fahrzeugName', 'bruttolistenpreis', 'monatlicheRate',
+            'laufzeit', 'anzahlung', 'ueberfuehrungskosten', 'mwstSatz',
+            'includeUeberfuehrungInFactor', 'fahrleistungKm', 'effektiveRateBrutto',
+            'bruttoLeasingfaktor', 'nettoLeasingfaktor', 'gesamtkostenBrutto',
+            'ratingLabel', 'savedAt'
+          ]);
+      }
+    }
+  }
+}

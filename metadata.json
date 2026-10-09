@@ -1,0 +1,6 @@
+{
+  "name": "Leasingfaktor Rechner",
+  "description": "Präziser Leasingfaktor-Rechner für Kfz & PKW mit nativer Foldable- und Mobil-Optimierung, Brutto- und Netto-Bewertung.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
